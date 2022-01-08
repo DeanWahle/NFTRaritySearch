@@ -2,13 +2,25 @@ import React from "react";
 import axios from "axios";
 import SearchBar from "./SearchBar";
 
+/*
+Todo, I actually realized I can go completely around the contract
+address route and literally just grab the assets with the 
+collection name and process the traits that way, 
+
+Im not really sure why i needed the contract address in the first place
+*/
+
 //TODO
-//Soccer doge club isnt finding the correct NFT
-//I think the issue is that right now iM going off the index of the
-//Lowest value, but if the colleciton was added out of order
-//this wont work
-//So we need to add the names of the nfts to another array
-//and then access the index of the "minimum" in the names array
+/*
+Currently, the program is working, except for collections 
+that are on asset contracts that are shared with other collections. 
+Since we retrieve the assets based on the asset contract address, any contract with multiple collections
+will return the rarest NFT out of all the collections on that contract. 
+
+TODO: is to figure out why collections would ever share a contract, and 
+figure out how to differentiate between collections on a contract that 
+contains multiple
+*/
 
 class Apirequest extends React.Component {
   state = {
@@ -23,16 +35,13 @@ class Apirequest extends React.Component {
 
   findMin = () => {
     let i = 0;
-    this.state.values.map((num) => {
-      console.log(this.state.names[i] + " " + num);
-      i++;
-    });
     this.setState({
       minIdx: this.state.values.indexOf(Math.min(...this.state.values)),
     });
   };
 
   findNum = (asset) => {
+    //console.log(asset.name);
     let curr = 1;
     asset.traits.map((trait) => {
       if (trait.trait_count !== 0) {
@@ -40,11 +49,10 @@ class Apirequest extends React.Component {
         curr *= mult;
       }
     });
-    console.log(asset);
     this.setState({
       values: [...this.state.values, curr],
       names: [...this.state.names, asset.name],
-    }); //simple value
+    });
   };
 
   afterSetStateFinished = async () => {
@@ -56,32 +64,40 @@ class Apirequest extends React.Component {
           this.state.contractAddress,
         {}
       );
+      //console.log(this.state.contractAddress);
       this.setState({ processed: i });
       collectionInfo.data.assets.map((asset) => {
-        //console.log(asset);
         return this.findNum(asset, i);
       });
     }
   };
 
-  onSearchSubmit = async (term) => {
-    this.setState({ values: [], names: [] });
+  findCollectionSize = async (term) => {
     const response = await axios.get(
       "https://api.opensea.io/api/v1/collection/" + term,
       {}
     );
+    this.setState({ loopSize: response.data.collection.stats.count });
+  };
+
+  onSearchSubmit = async (term) => {
+    this.setState({ values: [], names: [] });
+    const response = await axios.get(
+      "https://api.opensea.io/api/v1/assets?order_direction=asc&offset=0&limit=50&collection=" +
+        term,
+      {}
+    );
     this.setState(
       {
-        contractAddress:
-          response.data.collection.primary_asset_contracts[0].address,
-        loopSize: response.data.collection.stats.count,
+        contractAddress: response.data.assets[0].asset_contract.address,
       },
       () => {
-        this.afterSetStateFinished().then(this.findMin);
+        this.findCollectionSize(response.data.assets[0].collection.slug).then(
+          this.afterSetStateFinished().then(this.findMin)
+        );
       }
     );
   };
-
   render() {
     return (
       <div className="ui container" style={{ marginTop: "10px" }}>
