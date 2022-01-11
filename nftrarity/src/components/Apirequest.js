@@ -59,7 +59,7 @@ class Apirequest extends React.Component {
     });
     var topValues = [...this.state.values];
     var topFive = topValues.sort((a, b) => a - b).slice(0, 5);
-    console.log(topFive);
+    //console.log(topFive);
     for (let i = 0; i < 5; i++) {
       this.setState({
         topFiveTokenIds: [
@@ -74,7 +74,7 @@ class Apirequest extends React.Component {
     let curr = 1;
     asset.traits.map((trait) => {
       if (trait.trait_count !== 0) {
-        let mult = trait.trait_count / 10000;
+        let mult = trait.trait_count / this.state.loopSize;
         curr *= mult;
       }
     });
@@ -99,6 +99,7 @@ class Apirequest extends React.Component {
         return this.findNum(asset, i);
       });
     }
+    console.log(this.state.loopSize);
   };
 
   findCollectionSize = async (term) => {
@@ -126,7 +127,6 @@ class Apirequest extends React.Component {
           Processed: {this.state.processed} / {this.state.loopSize + 1}
         </div>
         <div>Rarest: {this.state.names[this.state.minIdx]}</div>
-        {this.state.cards.map((item) => console.log(item))}
       </div>
     );
   }
