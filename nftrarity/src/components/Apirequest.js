@@ -64,9 +64,9 @@ class Apirequest extends React.Component {
       minIdx: this.state.values.indexOf(Math.min(...this.state.values)),
     });
     var topValues = [...this.state.values];
-    var topFive = topValues.sort((a, b) => a - b).slice(0, 5);
+    var topFive = topValues.sort((a, b) => a - b).slice(0, 10);
     //console.log(topFive);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       this.setState({
         topFiveTokenIds: [
           ...this.state.topFiveTokenIds,
