@@ -7,6 +7,10 @@ import SearchBar from "./SearchBar";
 //Should probably make this a separate component and just pass down the contract address with the
 //top five tokens because this component is getting very crowded
 
+//Todo also, I think that the API isnt working on
+//adam-bomb-squad collection because its 25k assets
+//its throwing 404 http error after 10k, which makes
+//me think I need an API key
 class Apirequest extends React.Component {
   state = {
     contractAddress: "",
@@ -22,24 +26,25 @@ class Apirequest extends React.Component {
     searchTerm: "",
   };
   //https://api.opensea.io/api/v1/asset/0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb/8348/
-  renderRarest = async () => {
-    //console.log("Render Rarest");
-    var response;
-    for (let i = 0; i < 5; i++) {
-      this.setState({
-        cards: [
-          ...this.state.cards,
-          await axios.get(
-            "https://api.opensea.io/api/v1/asset/" +
-              this.state.contractAddress +
-              "/" +
-              this.state.topFiveTokenIds[i] +
-              "/"
-          ),
-        ],
-      });
-    }
-  };
+  // renderRarest = async () => {
+  //   console.log("Render Rarest");
+  //   var response;
+  //   for (let i = 0; i < 5; i++) {
+  //     this.setState({
+  //       cards: [
+  //         ...this.state.cards,
+  //         await axios.get(
+  //           "https://api.opensea.io/api/v1/asset/" +
+  //             this.state.contractAddress +
+  //             "/" +
+  //             this.state.topFiveTokenIds[i] +
+  //             "/"
+  //         ),
+  //       ],
+  //     });
+  //   }
+  //   console.log(this.state.topFiveTokenIds);
+  // };
 
   findAddress = async (term) => {
     const response = await axios.get(
@@ -48,8 +53,9 @@ class Apirequest extends React.Component {
       {}
     );
     this.setState({
-      contractAddress: response.data.assets[0].asset_contract.address,
+      contractAddress: response.data.assets[5].asset_contract.address,
     });
+    console.log("made it here " + this.state.contractAddress);
   };
 
   findMin = () => {
@@ -68,6 +74,7 @@ class Apirequest extends React.Component {
         ],
       });
     }
+    console.log(this.state.topFiveTokenIds);
   };
 
   findNum = (asset) => {
@@ -86,7 +93,7 @@ class Apirequest extends React.Component {
   };
 
   afterSetStateFinished = async (term) => {
-    for (let i = 0; i < this.state.loopSize + 51; i += 50) {
+    for (let i = 0; i < this.state.loopSize + 1; i += 50) {
       const collectionInfo = await axios.get(
         "https://api.opensea.io/api/v1/assets?order_direction=asc&offset=" +
           i +
@@ -99,7 +106,7 @@ class Apirequest extends React.Component {
         return this.findNum(asset, i);
       });
     }
-    console.log(this.state.loopSize);
+    console.log("Loopsize in function " + this.state.loopSize);
   };
 
   findCollectionSize = async (term) => {
@@ -108,15 +115,14 @@ class Apirequest extends React.Component {
       {}
     );
     this.setState({ loopSize: response.data.collection.stats.count });
+    console.log("Response: " + response.data.collection.stats.count);
+    console.log("Loop size: " + this.state.loopSize);
   };
 
   onSearchSubmit = (term) => {
     this.setState({ values: [], names: [], searchTerm: term });
     this.findCollectionSize(term).then(
-      this.afterSetStateFinished(term)
-        .then(this.findMin)
-        .then(this.findAddress(term))
-        .then(this.renderRarest)
+      this.afterSetStateFinished(term).then(this.findMin)
     );
   };
   render() {
