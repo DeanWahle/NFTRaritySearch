@@ -11,6 +11,8 @@ import SearchBar from "./SearchBar";
 //adam-bomb-squad collection because its 25k assets
 //its throwing 404 http error after 10k, which makes
 //me think I need an API key
+
+//TO DO CLEAR THE TOP 10 list of rarest ones
 class Apirequest extends React.Component {
   state = {
     contractAddress: "",
