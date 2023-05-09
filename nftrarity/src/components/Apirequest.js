@@ -57,7 +57,7 @@ class Apirequest extends React.Component {
     this.setState({
       contractAddress: response.data.assets[5].asset_contract.address,
     });
-    console.log("made it here " + this.state.contractAddress);
+    console.log("yo");
   };
 
   findMin = () => {
